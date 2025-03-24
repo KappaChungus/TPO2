@@ -8,42 +8,43 @@ import java.awt.event.ActionEvent;
 import java.util.*;
 
 public class GUI {
-    private JButton choseCountry;
-    private JButton choseCityButton;
-    private JButton rateButton;
-    private JButton NBPButton;
-    private JLabel weatherLabel;
-    private Service s;
-    private final JFrame frame;
-    private Set<String> countries;
+    private JButton _choseCountry;
+    private JButton _choseCityButton;
+    private JButton _rateButton;
+    private JButton _NBPButton;
+    private JLabel _weatherLabel;
+    private final Service _s;
+    private final JFrame _frame;
+    private Set<String> _countries;
 
 
-    public GUI() {
+    public GUI(Service s) {
         try {
             UIManager.setLookAndFeel(new FlatDarculaLaf());
         } catch (UnsupportedLookAndFeelException e) {
             System.err.println("xd");
         }
-        frame = new JFrame("");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(600, 400);
-        frame.setLayout(new FlowLayout());
-        frame.setLocationRelativeTo(null);
+        _s=s;
+        _frame = new JFrame("");
+        _frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        _frame.setSize(600, 400);
+        _frame.setLayout(new FlowLayout());
+        _frame.setLocationRelativeTo(null);
 
-        choseCountry.addActionListener(this::choseCountryListener);
-        choseCityButton.addActionListener(this::choseCityListener);
-        rateButton.addActionListener(this::rateButtonListener);
-        NBPButton.addActionListener(this::NBPrateListener);
+        _choseCountry.addActionListener(this::choseCountryListener);
+        _choseCityButton.addActionListener(this::choseCityListener);
+        _rateButton.addActionListener(this::rateButtonListener);
+        _NBPButton.addActionListener(this::NBPrateListener);
 
-        choseCityButton.setEnabled(false);
-        rateButton.setEnabled(false);
-        NBPButton.setEnabled(false);
+        _choseCityButton.setEnabled(false);
+        _rateButton.setEnabled(false);
+        _NBPButton.setEnabled(false);
 
-        frame.add(choseCountry);
-        frame.add(choseCityButton);
-        frame.add(rateButton);
-        frame.setVisible(true);
-        frame.add(NBPButton);
+        _frame.add(_choseCountry);
+        _frame.add(_choseCityButton);
+        _frame.add(_rateButton);
+        _frame.setVisible(true);
+        _frame.add(_NBPButton);
 
 
     }
@@ -52,24 +53,24 @@ public class GUI {
 
         JComboBox<String> choseCountryComboBox = new JComboBox<>(getCountries());
         int res = JOptionPane.showConfirmDialog(
-                frame,
+                _frame,
                 choseCountryComboBox,
                 "Select a Country",
                 JOptionPane.OK_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE
         );
         if (res == JOptionPane.OK_OPTION) {
-            s= Service.getInstance(Objects.requireNonNull(choseCountryComboBox.getSelectedItem()).toString());
-            choseCityButton.setEnabled(true);
-            rateButton.setEnabled(true);
-            NBPButton.setEnabled(true);
+            _s.setCountry((String) choseCountryComboBox.getSelectedItem());
+            _choseCityButton.setEnabled(true);
+            _rateButton.setEnabled(true);
+            _NBPButton.setEnabled(true);
         }
     }
 
     private void choseCityListener(ActionEvent e) {
-        JComboBox<String> choseCityComboBox = new JComboBox<>(s.getCities());
+        JComboBox<String> choseCityComboBox = new JComboBox<>(_s.getCities());
         int res = JOptionPane.showConfirmDialog(
-                frame,
+                _frame,
                 choseCityComboBox,
                 "Select a City",
                 JOptionPane.OK_CANCEL_OPTION,
@@ -85,7 +86,7 @@ public class GUI {
     private void rateButtonListener(ActionEvent e) {
         JComboBox<String> choseCountryComboBox = new JComboBox<>(getCountries());
         int res = JOptionPane.showConfirmDialog(
-                frame,
+                _frame,
                 choseCountryComboBox,
                 "Select a Country",
                 JOptionPane.OK_CANCEL_OPTION,
@@ -97,9 +98,9 @@ public class GUI {
             double exchangeRate;
             try {
                 String country = Objects.requireNonNull(choseCountryComboBox.getSelectedItem()).toString();
-                Currency currency = Currency.getInstance(s.getLocaleFromCountryName(country));
-                exchangeRate = s.getRateFor(currency.getSymbol());
-                message = "1 " + s.getCurrency().getSymbol() + " = " + exchangeRate + " " + currency.getSymbol();
+                Currency currency = Currency.getInstance(_s.getLocaleFromCountryName(country));
+                exchangeRate = _s.getRateFor(currency.getSymbol());
+                message = "1 " + _s.getCurrency().getSymbol() + " = " + exchangeRate + " " + currency.getSymbol();
             } catch (RuntimeException e2) {
                 message = e2.getMessage();
             }
@@ -116,7 +117,7 @@ public class GUI {
     private void NBPrateListener(ActionEvent e) {
         String message;
         try {
-            message = "1 " + s.getCurrency().getSymbol() + " = " + s.getNBPRate() + " PLN";
+            message = "1 " + _s.getCurrency().getSymbol() + " = " + _s.getNBPRate() + " PLN";
 
         } catch (RuntimeException e1) {
             message = e1.getMessage();
@@ -130,47 +131,47 @@ public class GUI {
 
     private void handleWeatherLabel(String city) {
         try {
-            s.getWeather(city);
+            _s.getWeather(city);
         } catch (Exception e1) {
             try {
-                frame.remove(weatherLabel);
+                _frame.remove(_weatherLabel);
             } catch (Exception ex) {
                 //nothing to remove
             }
-            weatherLabel = new JLabel("sry, city not found :(");
-            frame.add(weatherLabel);
-            frame.revalidate();
-            frame.repaint();
+            _weatherLabel = new JLabel("sry, city not found :(");
+            _frame.add(_weatherLabel);
+            _frame.revalidate();
+            _frame.repaint();
             return;
         }
-        ImageIcon weatherIcon = s.getWeatherIcon();
-        double temperature = s.getTemperature();
+        ImageIcon weatherIcon = _s.getWeatherIcon();
+        double temperature = _s.getTemperature();
 
         try {
-            frame.remove(weatherLabel);
+            _frame.remove(_weatherLabel);
         } catch (Exception ex) {
             //nothing to remove
         }
         String labelText = city + " <font size='6'>" + temperature + "°C</font>";
 
-        weatherLabel = new JLabel("<html>" + labelText + "</html>");
-        weatherLabel.setIcon(weatherIcon);
-        frame.add(weatherLabel);
-        frame.revalidate();
-        frame.repaint();
+        _weatherLabel = new JLabel("<html>" + labelText + "</html>");
+        _weatherLabel.setIcon(weatherIcon);
+        _frame.add(_weatherLabel);
+        _frame.revalidate();
+        _frame.repaint();
     }
 
     private String[] getCountries() {
-        if (countries != null)
-            return countries.toArray(new String[0]);
-        countries = new TreeSet<>();
+        if (_countries != null)
+            return _countries.toArray(new String[0]);
+        _countries = new TreeSet<>();
         Locale[] locales = Locale.getAvailableLocales();
         for (Locale locale : locales) {
             String country = locale.getDisplayCountry();
             if (!country.isEmpty()) {
-                countries.add(country);
+                _countries.add(country);
             }
         }
-        return countries.toArray(new String[0]);
+        return _countries.toArray(new String[0]);
     }
 }

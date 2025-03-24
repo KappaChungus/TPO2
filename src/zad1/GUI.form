@@ -7,7 +7,7 @@
     <properties/>
     <border type="none"/>
     <children>
-      <component id="59c34" class="javax.swing.JButton" binding="choseCountry">
+      <component id="59c34" class="javax.swing.JButton" binding="_choseCountry">
         <constraints>
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
@@ -28,7 +28,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
       </vspacer>
-      <component id="13afd" class="javax.swing.JButton" binding="choseCityButton">
+      <component id="13afd" class="javax.swing.JButton" binding="_choseCityButton">
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
@@ -43,7 +43,7 @@
           <gridbag weightx="0.0" weighty="0.0"/>
         </constraints>
       </vspacer>
-      <component id="6d41b" class="javax.swing.JButton" binding="rateButton">
+      <component id="6d41b" class="javax.swing.JButton" binding="_rateButton">
         <constraints>
           <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>
@@ -52,7 +52,7 @@
           <text value="exchange rate"/>
         </properties>
       </component>
-      <component id="c4d07" class="javax.swing.JButton" binding="NBPButton">
+      <component id="c4d07" class="javax.swing.JButton" binding="_NBPButton">
         <constraints>
           <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
           <gridbag weightx="0.0" weighty="0.0"/>

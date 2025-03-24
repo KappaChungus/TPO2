@@ -31,23 +31,13 @@ public class Service {
     private Currency _currency;
     private WeatherJson _weatherJson;
     private final Map<String, String[]> _cachedCities;
-    private static Service instance;
-
-    public static Service getInstance(String countryName) {
-        if(instance == null) {
-            instance = new Service(countryName);
-        }
-        instance.setCountry(countryName);
-        return instance;
-    }
 
     public Service(String countryName) {
-        instance = this;
         setCountry(countryName);
         _cachedCities = new HashMap<>();
     }
 
-    private void setCountry(String countryName) {
+    public void setCountry(String countryName) {
         _country = getLocaleFromCountryName(countryName);
         _currency = Currency.getInstance(_country);
     }

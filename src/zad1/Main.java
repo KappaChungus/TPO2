@@ -16,6 +16,6 @@ public class Main {
     Double rate1 = s.getRateFor("USD");
     Double rate2 = s.getNBPRate();
 
-    SwingUtilities.invokeLater(GUI::new);
+    SwingUtilities.invokeLater(()->new GUI(s));
   }
 }
