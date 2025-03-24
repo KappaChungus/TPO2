@@ -23,6 +23,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 
 
@@ -30,16 +32,19 @@ public class Service {
     private Locale _country;
     private Currency _currency;
     private WeatherJson _weatherJson;
-    private final Map<String, String[]> _cachedCities;
+    private final ConcurrentHashMap<String, String[]> _cachedCities;
+    private FutureTask<String[]> _getCities;
 
     public Service(String countryName) {
+        _cachedCities = new ConcurrentHashMap<>();
         setCountry(countryName);
-        _cachedCities = new HashMap<>();
     }
 
     public void setCountry(String countryName) {
         _country = getLocaleFromCountryName(countryName);
         _currency = Currency.getInstance(_country);
+        _getCities = new FutureTask<>(this::getCities1);
+         new Thread(_getCities).start();
     }
 
     public Locale getLocaleFromCountryName(String countryName) {
@@ -133,12 +138,21 @@ public class Service {
         }
     }
 
-
     public String[] getCities() {
+        synchronized (_cachedCities) {
+            String[] cached = _cachedCities.get(_country.getCountry());
+            if (cached != null)
+                return cached;
+        }
+        try {
+            return _getCities.get();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-        String[] cached = _cachedCities.get(_country.getCountry());
-        if (cached != null)
-            return cached;
+
+    private String[] getCities1() {
 
         try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest request = HttpRequest.newBuilder()
