@@ -1,6 +1,10 @@
 package zad1;
 
 import com.formdev.flatlaf.FlatDarculaLaf;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 
 import javax.swing.*;
 import java.awt.*;
@@ -79,7 +83,13 @@ public class GUI {
         if (res == JOptionPane.OK_OPTION) {
             String city = Objects.requireNonNull(choseCityComboBox.getSelectedItem()).toString();
             handleWeatherLabel(city);
-
+            new JFXPanel();
+            Platform.runLater(() -> {
+                WebView webView = new WebView();
+                WebEngine webEngine = webView.getEngine();
+                webEngine.load("https://en.wikipedia.org/wiki/"+city);
+                System.out.println(webEngine);
+            });
         }
     }
 
