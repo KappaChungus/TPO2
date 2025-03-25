@@ -14,11 +14,8 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.net.URI;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -43,7 +40,7 @@ public class Service {
     public void setCountry(String countryName) {
         _country = getLocaleFromCountryName(countryName);
         _currency = Currency.getInstance(_country);
-        _getCities = new FutureTask<>(this::getCities1);
+        _getCities = new FutureTask<>(this::getCitiesFromAPI);
          new Thread(_getCities).start();
     }
 
@@ -152,18 +149,25 @@ public class Service {
     }
 
 
-    private String[] getCities1() {
+    private String[] getCitiesFromAPI() {
 
-        try (HttpClient client = HttpClient.newHttpClient()) {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.countrystatecity.in/v1/countries/" + _country.getCountry() + "/cities"))
-                    .header("X-CSCAPI-KEY", "QmN5Y090MzdYRGY1NWtHOW5GTUZ5TWZqY2djcE9tM0Q4UExZQXhxOA==")
-                    .build();
+        try {
+            HttpURLConnection conn = getHttpURLConnection();
 
-            HttpResponse<String> response = client.send(request,
-                    HttpResponse.BodyHandlers.ofString());
+            int responseCode = conn.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                System.err.println("HTTP request failed with code: " + responseCode);
+                return new String[0];
+            }
 
-            JsonArray jsonArray = JsonParser.parseString(response.body()).getAsJsonArray();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                response.append(line);
+            }
+            reader.close();
+            JsonArray jsonArray = JsonParser.parseString(response.toString()).getAsJsonArray();
             String[] cityNames = new String[jsonArray.size()];
 
             int index = 0;
@@ -174,10 +178,20 @@ public class Service {
             return cityNames;
 
         } catch (Exception e) {
-            System.err.println("http client error");
+            System.err.println("HTTP client error: " + e.getMessage());
+            return null;
         }
+    }
 
-        return null;
+    private HttpURLConnection getHttpURLConnection() throws IOException {
+        String urlString = "https://api.countrystatecity.in/v1/countries/" + _country.getCountry() + "/cities";
+        URL url = new URL(urlString);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+        conn.setRequestProperty("X-CSCAPI-KEY", "QmN5Y090MzdYRGY1NWtHOW5GTUZ5TWZqY2djcE9tM0Q4UExZQXhxOA==");
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+        conn.setRequestProperty("Accept", "application/json");
+        return conn;
     }
 
     public Currency getCurrency() {
@@ -202,7 +216,7 @@ public class Service {
 
     static class NBPRate {
         public double getMid() {
-            return rates.getFirst().mid;
+            return rates.get(0).mid;
         }
 
         List<Rate> rates;
@@ -215,7 +229,7 @@ public class Service {
         private Main main;
 
         public String getIcon() {
-            return weather.getFirst().getIcon();
+            return weather.get(0).getIcon();
         }
 
         public double getTemperature() {
